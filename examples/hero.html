@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hero Backdrop Example</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Minimal pattern: one full-bleed hero + a section with a CSS-only backdrop. */
+  body { margin: 0; font: 16px/1.5 Inter, system-ui, sans-serif; color: #1F2547; background: #F6F9FF; }
+
+  .hero {
+    min-height: 100svh;
+    display: grid; place-content: center; text-align: center; padding: 24px;
+    /* static fallback shown until the canvas paints (and if WebGL is unavailable) */
+    background: radial-gradient(80% 70% at 20% 20%, #9BE0E8, transparent 60%),
+                radial-gradient(80% 70% at 80% 80%, #F8B8D9, transparent 60%), #F6F9FF;
+  }
+  .hero h1 { font: 400 clamp(56px, 11vw, 168px)/0.9 'Instrument Serif', serif; letter-spacing: -0.03em; margin: 0; }
+  .hero p { max-width: 36ch; margin: 18px auto 0; opacity: .8; }
+
+  .band { padding: 120px 24px; text-align: center; color: #fff; }
+  .band h2 { font: 400 56px/1 'Instrument Serif', serif; margin: 0; }
+</style>
+</head>
+<body>
+
+  <!-- Declarative: a preset name in data-backdrop, nothing else needed -->
+  <section class="hero" data-backdrop="fluid" data-grain="0.14">
+    <h1>Always in motion.</h1>
+    <p>A domain-warped noise field, mixed in OKLab, drawn by one shared WebGL context.</p>
+  </section>
+
+  <!-- Declarative with a custom palette + params -->
+  <section class="band" data-backdrop="aurora"
+           data-colors="#EDFFEB #5FE896 #2E7A6A #132B45"
+           data-params='{"fold":1.4,"stars":0.8}'>
+    <h2>Night swim</h2>
+  </section>
+
+  <script src="../assets/backdrop.js"></script>
+</body>
+</html>

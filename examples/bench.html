@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backdrop Benchmark</title>
+<style>
+  :root { --hud-bg: rgba(15, 15, 18, 0.78); --hud-ink: #F4F2EE; --hud-muted: #A9A49B; }
+  html, body { margin: 0; height: 100%; background: #111; }
+  #stage { position: fixed; inset: 0; }
+  .hud {
+    position: fixed; top: 16px; left: 16px; z-index: 2; width: min(320px, calc(100vw - 32px));
+    background: var(--hud-bg); color: var(--hud-ink); border-radius: 14px; padding: 14px 16px;
+    font: 13px/1.5 ui-monospace, Menlo, monospace; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  .hud .big { font: 600 30px/1 ui-monospace, Menlo, monospace; }
+  .hud .row { display: flex; justify-content: space-between; gap: 8px; }
+  .hud .muted { color: var(--hud-muted); }
+  .hud select, .hud button {
+    font: inherit; background: rgba(255,255,255,.1); color: inherit; border: 1px solid rgba(255,255,255,.18);
+    border-radius: 8px; padding: 5px 8px;
+  }
+  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+  .controls select { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div class="hud" aria-live="polite">
+  <div class="row"><span class="big" id="fps">–</span><span class="muted">fps</span></div>
+  <div class="row"><span class="muted">frame p95</span><span id="p95">–</span></div>
+  <div class="row"><span class="muted">render size</span><span id="size">–</span></div>
+  <div class="row"><span class="muted">mode</span><span id="mode">–</span></div>
+  <div class="row"><span class="muted">browser</span><span id="ua">–</span></div>
+  <div class="controls">
+    <select id="style" aria-label="Style"></select>
+    <button id="modeBtn">mode: direct</button>
+    <button id="grainBtn">grain: on</button>
+  </div>
+</div>
+<script src="../assets/backdrop.js"></script>
+<script>
+const { createBackdrop, PRESETS, STYLES } = GradientBackdrop;
+const q = new URLSearchParams(location.search);
+const state = {
+  style: q.get('style') || 'flow',
+  mode: q.get('mode') || 'direct',
+  grain: q.has('grain') ? +q.get('grain') : 0.14,
+};
+const presetFor = (style) => Object.keys(PRESETS).find((k) => PRESETS[k].style === style);
+
+const sel = document.getElementById('style');
+sel.innerHTML = Object.keys(STYLES).map((s) => `<option value="${s}">${STYLES[s].label}</option>`).join('');
+sel.value = state.style;
+
+let bd;
+function mount() {
+  bd && bd.destroy();
+  bd = createBackdrop(document.getElementById('stage'), { preset: presetFor(state.style), mode: state.mode, grain: state.grain });
+  document.getElementById('mode').textContent = bd.mode;
+  document.getElementById('modeBtn').textContent = 'mode: ' + state.mode;
+  document.getElementById('grainBtn').textContent = 'grain: ' + (state.grain ? 'on' : 'off');
+  const url = new URL(location);
+  url.searchParams.set('style', state.style); url.searchParams.set('mode', state.mode); url.searchParams.set('grain', state.grain);
+  history.replaceState(null, '', url);
+}
+sel.onchange = () => { state.style = sel.value; mount(); };
+document.getElementById('modeBtn').onclick = () => { state.mode = state.mode === 'direct' ? 'shared' : 'direct'; mount(); };
+document.getElementById('grainBtn').onclick = () => { state.grain = state.grain ? 0 : 0.14; mount(); };
+mount();
+
+const ua = navigator.userAgent;
+document.getElementById('ua').textContent =
+  /Edg\//.test(ua) ? 'Edge' : /Chrome\//.test(ua) ? 'Chrome' : /Firefox\//.test(ua) ? 'Firefox' : /Safari\//.test(ua) ? 'Safari' : 'other';
+
+// rolling one-second window of frame intervals
+let times = [];
+let last = performance.now();
+function loop(now) {
+  times.push(now - last); last = now;
+  let sum = 0, i = times.length - 1;
+  while (i >= 0 && sum < 1000) sum += times[i--];
+  times = times.slice(i + 1);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+setInterval(() => {
+  if (!times.length) return;
+  const sorted = [...times].sort((a, b) => a - b);
+  document.getElementById('fps').textContent = (1000 / (times.reduce((a, b) => a + b, 0) / times.length)).toFixed(0);
+  document.getElementById('p95').textContent = sorted[Math.floor(sorted.length * 0.95)].toFixed(1) + ' ms';
+  document.getElementById('size').textContent = bd.canvas.width + '×' + bd.canvas.height;
+}, 500);
+</script>
+</body>
+</html>

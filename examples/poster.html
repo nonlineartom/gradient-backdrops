@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poster example</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@500&display=swap" rel="stylesheet">
+<style>
+  /* A 4:5 social card. Pick a look, edit the text, then save the backdrop as a PNG
+     (bd.snapshot()) to use in Figma, Canva or a video editor. */
+  :root { --bg: #F6F3EE; --ink: #1C1A17; --chip: #ECE7DF; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #141312; --ink: #F2EEE8; --chip: #2A2724; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; gap: 18px; padding: 24px; background: var(--bg); color: var(--ink); font: 14px/1.4 Inter, system-ui, sans-serif; align-content: center; }
+  .poster { width: min(440px, 100%, calc((100vh - 140px) * 0.8)); aspect-ratio: 4 / 5; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.18); padding: 9%; display: flex; flex-direction: column; justify-content: space-between; }
+  .poster .kicker { font-size: .8em; letter-spacing: .24em; text-transform: uppercase; }
+  .poster h1 { font: 400 4.2em/0.92 'Instrument Serif', serif; letter-spacing: -0.02em; margin: 0; outline: none; }
+  .poster h1 em { font-style: italic; }
+  .poster small { opacity: .8; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .chips button, .save { border: 0; font: inherit; cursor: pointer; padding: 8px 16px; border-radius: 999px; background: var(--chip); color: var(--ink); }
+  .chips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  .save { background: var(--ink); color: var(--bg); }
+</style>
+</head>
+<body>
+
+  <article class="poster" id="poster">
+    <div class="kicker">Summer series · 03</div>
+    <h1 contenteditable spellcheck="false">Slow<br><em>light.</em></h1>
+    <small>Edit this text. Pick a look below.</small>
+  </article>
+
+  <div class="chips" id="chips" role="group" aria-label="Look"></div>
+  <button class="save" id="save">Save backdrop as PNG</button>
+
+  <script src="../assets/backdrop.js"></script>
+  <script>
+    const { createBackdrop, PRESETS } = GradientBackdrop;
+    // Poster-friendly looks, each with a text colour that reads on it.
+    const LOOKS = {
+      solstice:  '#7A3A22',
+      petal:     '#5A2A4F',
+      'with-love': '#8F3B5A',
+      bloom:     '#FFF0E7',
+      amethyst:  '#F6EEFF',
+      'night-swim': '#F2FFF4',
+      'solar-flare': '#FFF4E0',
+      'paper-garden': '#3D3A33',
+    };
+
+    const poster = document.getElementById('poster');
+    // animate:false renders one still frame, ideal for a poster you plan to export
+    const bd = createBackdrop(poster, { preset: 'solstice', animate: false, grain: 0.14, mode: 'direct' });
+
+    const chips = document.getElementById('chips');
+    function pick(name) {
+      bd.set({ preset: name });
+      poster.style.color = LOOKS[name];
+      chips.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.name === name));
+    }
+    for (const name of Object.keys(LOOKS)) {
+      const b = document.createElement('button');
+      b.dataset.name = name;
+      b.textContent = name.replace(/-/g, ' ');
+      b.onclick = () => pick(name);
+      chips.appendChild(b);
+    }
+    pick('solstice');
+
+    document.getElementById('save').onclick = () => {
+      const a = document.createElement('a');
+      a.href = bd.snapshot();            // PNG data URL of the current frame
+      a.download = 'poster-backdrop.png';
+      a.click();
+    };
+  </script>
+</body>
+</html>

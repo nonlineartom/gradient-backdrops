@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gradient Backdrops</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=Syne:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F6F3EE; --panel: #FFFFFF; --ink: #1C1A17; --muted: #6E6A63; --line: #E4DFD6; --chip: #ECE7DF;
+    --radius: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #141312; --panel: #1E1C1A; --ink: #F2EEE8; --muted: #A39E95; --line: #2E2B28; --chip: #2A2724; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 Inter, system-ui, sans-serif; }
+  header { padding: 32px 24px 8px; max-width: 1240px; margin: 0 auto; }
+  h1 { font: 600 26px/1.1 Inter, sans-serif; letter-spacing: -0.02em; margin: 0 0 6px; }
+  header p { margin: 0; color: var(--muted); max-width: 640px; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; padding: 16px 24px 0; max-width: 1240px; margin: 0 auto; }
+  .filters button { border: 0; background: var(--chip); color: var(--ink); padding: 7px 14px; border-radius: 999px; font: inherit; cursor: pointer; }
+  .filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  main { max-width: 1240px; margin: 0 auto; padding: 20px 24px 64px; display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); }
+  .card { background: var(--panel); border-radius: var(--radius); overflow: hidden; box-shadow: 0 1px 0 var(--line), 0 8px 24px rgba(0,0,0,0.05); cursor: pointer; transition: transform .2s ease; }
+  .card:hover { transform: translateY(-2px); }
+  .card:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .art { position: relative; aspect-ratio: 3 / 2; overflow: hidden; }
+  .art .type { position: absolute; inset: 0; padding: 7% 7.5%; display: flex; flex-direction: column; pointer-events: none; }
+  .meta { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; gap: 8px; }
+  .meta b { font-weight: 500; }
+  .meta small { color: var(--muted); }
+  .swatches { display: flex; gap: 3px; }
+  .swatches i { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .section-title { grid-column: 1 / -1; margin: 18px 0 -4px; font-weight: 600; color: var(--muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+
+  /* type treatments */
+  .t-bebas { font-family: 'Bebas Neue', sans-serif; line-height: .88; letter-spacing: -0.01em; }
+  .t-serif { font-family: 'Instrument Serif', serif; line-height: .95; letter-spacing: -0.02em; }
+  .t-fraunces { font-family: Fraunces, serif; letter-spacing: -0.04em; }
+  .t-syne { font-family: Syne, sans-serif; font-weight: 700; letter-spacing: -0.06em; }
+  .t-sans { font-family: Inter, sans-serif; font-weight: 500; letter-spacing: -0.04em; }
+  .t-mono { font-family: ui-monospace, Menlo, monospace; letter-spacing: .3em; text-transform: uppercase; }
+  .kicker { font: 500 9px/1 Inter, sans-serif; letter-spacing: .22em; text-transform: uppercase; opacity: .85; }
+
+  /* playground */
+  .stage { position: fixed; inset: 0; z-index: 10; display: none; grid-template-columns: 1fr 320px; background: #000; }
+  .stage.open { display: grid; }
+  .stage .view { position: relative; overflow: hidden; }
+  .stage .view .type { position: absolute; inset: 0; padding: 7%; display: flex; flex-direction: column; pointer-events: none; }
+  .panel { background: var(--panel); color: var(--ink); overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .panel h2 { margin: 0; font-size: 16px; }
+  .panel label { display: grid; grid-template-columns: 92px 1fr 44px; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+  .panel label output { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .panel input[type=range] { width: 100%; accent-color: var(--ink); }
+  .panel select { width: 100%; padding: 7px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; }
+  .colors { display: flex; flex-wrap: wrap; gap: 6px; }
+  .colors input { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 2px; background: none; cursor: pointer; }
+  .colors button { width: 36px; height: 36px; border-radius: 8px; border: 1px dashed var(--line); background: none; color: var(--muted); cursor: pointer; font-size: 16px; }
+  .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .btns button { padding: 9px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; cursor: pointer; }
+  .btns button.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  pre { margin: 0; background: var(--bg); border-radius: 10px; padding: 10px; font-size: 11px; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow: auto; }
+  .hint { color: var(--muted); font-size: 12px; margin: 0; }
+  .close { position: absolute; top: 14px; left: 14px; z-index: 2; border: 0; border-radius: 999px; padding: 8px 14px; background: rgba(255,255,255,.85); color: #111; font: 500 13px Inter, sans-serif; cursor: pointer; backdrop-filter: blur(8px); }
+  @media (max-width: 760px) {
+    .stage { grid-template-columns: 1fr; grid-template-rows: 45vh 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Gradient Backdrops</h1>
+  <p>Every card below is live. Click one to open it full screen, change the colours and settings, then copy the config into your project.</p>
+</header>
+<nav class="filters" id="filters" aria-label="Filter by style"></nav>
+<main id="grid"></main>
+
+<section class="stage" id="stage" aria-label="Playground">
+  <div class="view" id="view">
+    <button class="close" id="close">← Gallery</button>
+    <div class="type" id="viewType"></div>
+  </div>
+  <aside class="panel">
+    <h2 id="pgTitle">Playground</h2>
+    <select id="pgPreset" aria-label="Preset"></select>
+    <select id="pgStyle" aria-label="Style"></select>
+    <p class="hint" id="pgOrder"></p>
+    <div class="colors" id="pgColors"></div>
+    <div id="pgParams" style="display:grid;gap:10px"></div>
+    <div style="display:grid;gap:10px">
+      <label>speed <input type="range" id="pgSpeed" min="0" max="4" step="0.05" value="1"><output></output></label>
+      <label>grain <input type="range" id="pgGrain" min="0" max="0.6" step="0.01" value="0"><output></output></label>
+      <label>seed <input type="range" id="pgSeed" min="0" max="50" step="1" value="0"><output></output></label>
+    </div>
+    <div class="btns">
+      <button class="primary" id="copyJs">Copy JS</button>
+      <button id="copyHtml">Copy HTML</button>
+      <button id="pausePlay">Pause</button>
+      <button id="savePng">Save PNG</button>
+    </div>
+    <pre id="pgCode"></pre>
+  </aside>
+</section>
+
+<script src="../assets/backdrop.js"></script>
+<script>
+const { createBackdrop, cssBackdrop, grainURL, STYLES, PRESETS, CSS_PRESETS } = GradientBackdrop;
+
+// Typography for each card: a mix of poster-style type treatments to show how text sits on each look
+const TYPE = {
+  'after-hours':      { html: '<div class="t-bebas" style="font-size:3.4em;margin-top:auto;margin-bottom:auto">AFTER<br>HOURS</div><div class="kicker">Vol. 008</div>', ink: '#F2FBF8' },
+  'ambient':          { html: '<div class="t-mono" style="margin:auto;font-size:.85em">Ambient</div>', ink: '#F2F7FF' },
+  'citron':           { html: '<div class="kicker">Prism</div><div class="t-serif" style="font-size:3.1em">Citron</div>', ink: '#F2EDCC' },
+  'edge':             { html: '<div class="t-bebas" style="font-size:3.6em;margin:auto 0">EDGE</div>', ink: '#F4F8EB' },
+  'glacier':          { html: '<div class="kicker">Prism</div><div class="t-serif" style="font-size:2.8em;margin-top:auto">Glacier</div>', ink: '#183F60' },
+  'moons':            { html: '<div class="t-serif" style="font-size:2.6em;margin:auto 0">Moon<br>club.</div>', ink: '#E8F1FF' },
+  'bloom':            { html: '<div class="t-serif" style="font-size:3em;margin:auto 0">Bloom</div>', ink: '#FFF0E7' },
+  'night-swim':       { html: '<div class="t-sans" style="margin:4% auto 0;letter-spacing:.24em;font-size:.8em">night swim</div><div class="kicker" style="margin:auto auto 0">Low tide records</div>', ink: '#F2FFF4' },
+  'violet-veil':      { html: '<div class="t-serif" style="font-size:2.4em;margin-top:auto;font-style:italic">Violet veil</div>', ink: '#FBEFFF' },
+  'amethyst':         { html: '<div class="t-serif" style="font-size:1.9em;margin-top:auto;font-style:italic">Amethyst</div><div class="kicker">Silk · No. 07</div>', ink: '#F6EEFF' },
+  'pearl-silk':       { html: '<div class="t-fraunces" style="font-size:2.2em;margin:auto 0">Pearl</div>', ink: '#22343E' },
+  'blue-sky':         { html: '<div class="t-fraunces" style="font-size:2.9em;line-height:.9;font-weight:600;margin:auto 0">Blue<br>sky.</div>', ink: '#1E3B6D' },
+  'start-here':       { html: '<div class="t-serif" style="font-size:2.2em;margin:auto 0">Gradient backgrounds<br>for stories.</div>', ink: '#FFFFFF' },
+  'fluid':            { html: '<div class="t-syne" style="font-size:3.2em;margin:auto 0">Fluid.</div><div class="kicker">Always in motion</div>', ink: '#323F78' },
+  'iridescent-cloud': { html: '<div class="t-serif" style="font-size:3em;margin:auto">Sonorous</div>', ink: '#1F1B2E' },
+  'lagoon':           { html: '<div class="t-sans" style="font-size:2.4em;margin:auto 0">lagoon</div>', ink: '#0E2A44' },
+  'solar-flare':      { html: '<div class="t-bebas" style="font-size:3.4em;margin:auto 0">SOLAR<br>FLARE</div>', ink: '#FFF4E0' },
+  'orchid':           { html: '<div class="t-serif" style="font-size:2.8em;margin:auto 0;font-style:italic">Orchid</div>', ink: '#FFFFFF' },
+  'soft-signal':      { html: '<div class="t-sans" style="font-size:2em;margin:auto auto 0">soft signal</div><div class="kicker" style="margin:10px auto auto">Independent studio</div>', ink: '#342F61' },
+  'any-words':        { html: '<div class="t-serif" style="font-size:2.2em;margin:auto;text-align:center">Any words,<br>any font.</div>', ink: '#3A2F52' },
+  'tidal':            { html: '<div class="t-sans" style="margin:0 auto;letter-spacing:.28em;font-size:1em">TIDAL</div>', ink: '#54395F' },
+  'field-notes':      { html: '<div class="t-serif" style="font-size:2.7em">Field<br>notes.</div>', ink: '#234B36' },
+  'gather':           { html: '<div class="t-fraunces" style="font-size:2.3em;margin:auto auto 0">gather</div><div class="kicker" style="margin:10px auto auto">Supper club</div>', ink: '#632345' },
+  'solstice':         { html: '<div class="t-serif" style="font-size:1.4em;margin-top:auto">Solstice</div>', ink: '#7A3A22' },
+  'petal':            { html: '<div class="kicker" style="margin-top:auto;letter-spacing:.3em">Petal</div>', ink: '#5A2A4F' },
+  'with-love':        { html: '<div class="t-serif" style="font-size:1.3em;font-style:italic">with love</div>', ink: '#8F3B5A' },
+  'celtics':          { html: '<div class="t-serif" style="font-size:2.8em;margin:auto 0 0 auto">Celtics</div>', ink: '#1E4A28' },
+  'verdant':          { html: '<div class="t-sans" style="margin:auto auto 0;letter-spacing:.25em;font-size:.95em">VERDANT</div><div class="kicker" style="margin:10px auto auto">A new season</div>', ink: '#F8FBEB' },
+  'paper-garden':     { html: '<div class="t-serif" style="font-size:2.4em;margin-top:auto;font-style:italic">Paper garden</div>', ink: '#3D3A33' },
+};
+const CSS_TYPE = {
+  'slow-days':   { html: '<div class="t-serif" style="font-size:2.8em;margin:auto;font-style:italic">Slow days</div>', ink: '#853B51' },
+  'rosa':        { html: '<div class="t-fraunces" style="font-size:2.2em;margin:auto;letter-spacing:.16em">ROSA</div>', ink: '#67364F' },
+  'atelier':     { html: '<div class="t-serif" style="font-size:3em;margin:auto auto 0;font-style:italic">Atelier</div><div class="kicker" style="margin:10px auto auto">N° 08</div>', ink: '#713221' },
+  'soft-signal': { html: '<div class="t-sans" style="font-size:1.8em;margin:auto">soft signal · css</div>', ink: '#342F61' },
+  'halo':        { html: '<div class="t-serif" style="font-size:2.6em;margin:auto">Halo</div>', ink: '#4A3A66' },
+};
+
+const grid = document.getElementById('grid');
+const fontScale = (el) => { el.style.fontSize = (el.clientWidth / 340 * 16) + 'px'; };
+
+function swatches(colors) {
+  return `<span class="swatches">${colors.map(c => `<i style="background:${c}"></i>`).join('')}</span>`;
+}
+
+// The full-screen playground gets its own WebGL context, reserved before the cards
+// take the per-page budget (later cards fall back to the shared renderer).
+const view = document.getElementById('view');
+let live = createBackdrop(view, { preset: 'fluid', mode: 'direct', animate: true });
+live.pause();
+const cardBackdrops = [];
+
+const cards = [];
+for (const [name, p] of Object.entries(PRESETS)) {
+  const t = TYPE[name] || { html: '', ink: '#fff' };
+  const card = document.createElement('article');
+  card.className = 'card';
+  card.tabIndex = 0;
+  card.dataset.style = p.style;
+  card.innerHTML = `<div class="art"><div class="type" style="color:${t.ink}">${t.html}</div></div>
+    <div class="meta"><div><b>${name.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase())}</b><br><small>${STYLES[p.style].label}</small></div>${swatches(p.colors)}</div>`;
+  grid.appendChild(card);
+  const art = card.querySelector('.art');
+  cardBackdrops.push(createBackdrop(art, { preset: name, grain: 0.12 }));
+  new ResizeObserver(() => fontScale(art.querySelector('.type'))).observe(art);
+  card.addEventListener('click', () => openStage(name));
+  card.addEventListener('keydown', (e) => { if (e.key === 'Enter') openStage(name); });
+  cards.push(card);
+}
+
+const cssTitle = document.createElement('div');
+cssTitle.className = 'section-title';
+cssTitle.textContent = 'CSS-only (no canvas, zero JS at runtime)';
+cssTitle.dataset.style = 'css';
+grid.appendChild(cssTitle);
+for (const [name, p] of Object.entries(CSS_PRESETS)) {
+  const t = CSS_TYPE[name];
+  const card = document.createElement('article');
+  card.className = 'card';
+  card.dataset.style = 'css';
+  card.innerHTML = `<div class="art" style="background:${cssBackdrop(p.kind, p.colors)}">
+      ${p.grain ? `<div style="position:absolute;inset:0;background:url(${grainURL()}) 0 0/256px;opacity:${p.grain}"></div>` : ''}
+      <div class="type" style="color:${t.ink}">${t.html}</div></div>
+    <div class="meta"><div><b>${name.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase())}</b><br><small>CSS · ${p.kind}</small></div>${swatches(p.colors)}</div>`;
+  card.addEventListener('click', () => {
+    navigator.clipboard?.writeText(`background: ${cssBackdrop(p.kind, p.colors)};`);
+    card.querySelector('small').textContent = 'Copied CSS ✓';
+  });
+  grid.appendChild(card);
+  new ResizeObserver(() => fontScale(card.querySelector('.type'))).observe(card.querySelector('.art'));
+  cards.push(card);
+}
+
+// filters
+const filters = document.getElementById('filters');
+const styleNames = ['all', ...new Set(Object.values(PRESETS).map(p => p.style)), 'css'];
+for (const s of styleNames) {
+  const b = document.createElement('button');
+  b.textContent = s === 'all' ? 'All' : s === 'css' ? 'CSS only' : STYLES[s].label;
+  b.setAttribute('aria-pressed', s === 'all');
+  b.onclick = () => {
+    filters.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    [...cards, cssTitle].forEach(c => { c.style.display = (s === 'all' || c.dataset.style === s) ? '' : 'none'; });
+  };
+  filters.appendChild(b);
+}
+
+// ---------------------------------------------------------------------------
+// Playground
+// ---------------------------------------------------------------------------
+const stage = document.getElementById('stage');
+const viewType = document.getElementById('viewType');
+const pgPreset = document.getElementById('pgPreset');
+const pgStyle = document.getElementById('pgStyle');
+const pgColors = document.getElementById('pgColors');
+const pgParams = document.getElementById('pgParams');
+const pgCode = document.getElementById('pgCode');
+let state = null;
+
+pgPreset.innerHTML = Object.keys(PRESETS).map(n => `<option value="${n}">${n}</option>`).join('');
+pgStyle.innerHTML = Object.entries(STYLES).map(([n, s]) => `<option value="${n}">${s.label}</option>`).join('');
+
+function toHex(c) {
+  if (/^#[0-9a-f]{6}$/i.test(c)) return c;
+  const rgb = GradientBackdrop.parseColor(c);
+  return '#' + rgb.map(v => Math.round(v * 255).toString(16).padStart(2, '0')).join('');
+}
+
+function openStage(name) {
+  const p = PRESETS[name];
+  state = { preset: name, style: p.style, colors: p.colors.map(toHex), params: { ...(p.params || {}) }, speed: 1, grain: 0.12, seed: 0 };
+  stage.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  const t = TYPE[name] || { html: '', ink: '#fff' };
+  viewType.style.color = t.ink;
+  viewType.innerHTML = t.html;
+  fontScale(viewType);
+  live.set({ ...state, preset: undefined, time: live.time });
+  // cards sit under the full-screen stage: stop animating them while it's open
+  cardBackdrops.forEach((b) => b.pause());
+  live.play();
+  document.getElementById('pausePlay').textContent = 'Pause';
+  pgPreset.value = name;
+  buildPanel();
+}
+
+function buildPanel() {
+  pgStyle.value = state.style;
+  document.getElementById('pgTitle').textContent = STYLES[state.style].label;
+  document.getElementById('pgOrder').textContent = 'Colour order: ' + STYLES[state.style].order;
+  pgColors.innerHTML = '';
+  state.colors.forEach((c, i) => {
+    const inp = document.createElement('input');
+    inp.type = 'color';
+    inp.value = c;
+    inp.title = 'Right-click to remove';
+    inp.oninput = () => { state.colors[i] = inp.value; apply(); };
+    inp.oncontextmenu = (e) => { e.preventDefault(); if (state.colors.length > 2) { state.colors.splice(i, 1); buildPanel(); apply(); } };
+    pgColors.appendChild(inp);
+  });
+  if (state.colors.length < 6) {
+    const add = document.createElement('button');
+    add.textContent = '+';
+    add.title = 'Add colour';
+    add.onclick = () => { state.colors.push(state.colors[state.colors.length - 1]); buildPanel(); apply(); };
+    pgColors.appendChild(add);
+  }
+  pgParams.innerHTML = '';
+  for (const [k, spec] of Object.entries(STYLES[state.style].params)) {
+    if (!Array.isArray(spec)) continue;
+    const [def, min, max, step] = spec;
+    const val = state.params[k] ?? def;
+    const lab = document.createElement('label');
+    lab.innerHTML = `${k} <input type="range" min="${min}" max="${max}" step="${step}" value="${val}"><output>${+val}</output>`;
+    const inp = lab.querySelector('input');
+    inp.oninput = () => { state.params[k] = +inp.value; lab.querySelector('output').textContent = inp.value; apply(); };
+    pgParams.appendChild(lab);
+  }
+  for (const id of ['pgSpeed', 'pgGrain', 'pgSeed']) {
+    const inp = document.getElementById(id);
+    const key = id.slice(2).toLowerCase();
+    inp.value = state[key];
+    inp.nextElementSibling.textContent = state[key];
+    inp.oninput = () => { state[key] = +inp.value; inp.nextElementSibling.textContent = inp.value; apply(); };
+  }
+  renderCode();
+}
+
+function apply() {
+  live.set({ style: state.style, colors: state.colors, params: state.params, speed: state.speed, grain: state.grain, seed: state.seed });
+  renderCode();
+}
+
+function configObject() {
+  const defaults = Object.fromEntries(Object.entries(STYLES[state.style].params).map(([k, s]) => [k, Array.isArray(s) ? s[0] : s.value]));
+  const params = Object.fromEntries(Object.entries(state.params).filter(([k, v]) => JSON.stringify(v) !== JSON.stringify(defaults[k])));
+  const o = { style: state.style, colors: state.colors };
+  if (Object.keys(params).length) o.params = params;
+  if (state.speed !== 1) o.speed = state.speed;
+  if (state.grain) o.grain = state.grain;
+  if (state.seed) o.seed = state.seed;
+  return o;
+}
+function jsSnippet() {
+  return `createBackdrop(document.querySelector('.hero'), ${JSON.stringify(configObject(), null, 2)});`;
+}
+function htmlSnippet() {
+  const o = configObject();
+  const attrs = [`data-backdrop="${o.style}"`, `data-colors="${o.colors.join(' ')}"`];
+  if (o.params) attrs.push(`data-params='${JSON.stringify(o.params)}'`);
+  if (o.speed) attrs.push(`data-speed="${o.speed}"`);
+  if (o.grain) attrs.push(`data-grain="${o.grain}"`);
+  if (o.seed) attrs.push(`data-seed="${o.seed}"`);
+  return `<section class="hero" ${attrs.join(' ')}>\n  …\n</section>`;
+}
+function renderCode() { pgCode.textContent = jsSnippet(); }
+
+pgPreset.onchange = () => openStage(pgPreset.value);
+pgStyle.onchange = () => { state.style = pgStyle.value; state.params = {}; apply(); buildPanel(); };
+document.getElementById('copyJs').onclick = (e) => { navigator.clipboard?.writeText(jsSnippet()); e.target.textContent = 'Copied ✓'; setTimeout(() => (e.target.textContent = 'Copy JS'), 1200); };
+document.getElementById('copyHtml').onclick = (e) => { navigator.clipboard?.writeText(htmlSnippet()); e.target.textContent = 'Copied ✓'; setTimeout(() => (e.target.textContent = 'Copy HTML'), 1200); };
+document.getElementById('pausePlay').onclick = (e) => { live.toggle(); e.target.textContent = live.paused ? 'Play' : 'Pause'; };
+document.getElementById('savePng').onclick = () => {
+  const a = document.createElement('a');
+  a.href = live.snapshot();
+  a.download = `${state.style}-backdrop.png`;
+  a.click();
+};
+function closeStage() {
+  stage.classList.remove('open');
+  document.body.style.overflow = '';
+  live.pause();
+  cardBackdrops.forEach((b) => b.play());
+}
+document.getElementById('close').onclick = closeStage;
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && stage.classList.contains('open')) closeStage(); });
+new ResizeObserver(() => fontScale(viewType)).observe(view);
+</script>
+</body>
+</html>

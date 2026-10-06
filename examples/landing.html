@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Landing page example</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* A whole page built from three backdrops: a calm flowing hero, a mesh section behind cards,
+     and a dark aurora call to action. Text is plain HTML on top; no extra z-index needed. */
+  :root { --ink: #1B2147; --muted: #4C5478; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.55 Inter, system-ui, sans-serif; color: var(--ink); background: #F6F9FF; }
+  a { color: inherit; }
+
+  nav { position: absolute; top: 0; left: 0; right: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; padding: 22px clamp(20px, 5vw, 56px); }
+  nav b { font: 400 26px 'Instrument Serif', serif; letter-spacing: -0.01em; }
+  nav ul { display: flex; gap: 28px; list-style: none; margin: 0; padding: 0; font-size: 14px; font-weight: 500; }
+  nav a { text-decoration: none; }
+  @media (max-width: 640px) { nav ul { display: none; } }
+
+  .btn { display: inline-block; padding: 13px 24px; border-radius: 999px; background: var(--ink); color: #fff; font-weight: 500; text-decoration: none; }
+  .btn.ghost { background: rgba(255,255,255,.55); color: var(--ink); box-shadow: inset 0 0 0 1px rgba(27,33,71,.12); }
+
+  /* 1. Hero: the static gradient is the first-paint (and no-WebGL) fallback */
+  .hero {
+    min-height: 100svh; display: grid; place-content: center; text-align: center; padding: 120px 24px 80px;
+    background: radial-gradient(80% 70% at 20% 20%, #9BE0E8, transparent 60%),
+                radial-gradient(80% 70% at 80% 80%, #F8B8D9, transparent 60%), #F6F9FF;
+  }
+  .hero h1 { font: 400 clamp(52px, 10vw, 148px)/0.92 'Instrument Serif', serif; letter-spacing: -0.03em; margin: 0; }
+  .hero h1 em { font-style: italic; }
+  .hero p { max-width: 40ch; margin: 22px auto 30px; font-size: 18px; color: var(--muted); }
+  .hero .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* 2. Features: a still, soft mesh behind frosted cards */
+  .features { padding: 110px clamp(20px, 5vw, 56px); background: linear-gradient(135deg, #EAF4FC, #F4B3C2); }
+  .features h2, .cta h2 { font: 400 clamp(36px, 5vw, 64px)/1 'Instrument Serif', serif; letter-spacing: -0.02em; margin: 0 0 40px; text-align: center; }
+  .cards { max-width: 1080px; margin: 0 auto; display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .card { background: rgba(255,255,255,.62); border-radius: 22px; padding: 28px; box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 12px 40px rgba(60,40,90,.08); }
+  .card h3 { margin: 0 0 8px; font-size: 18px; letter-spacing: -0.01em; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  .card i { display: block; width: 34px; height: 34px; border-radius: 10px; margin-bottom: 18px; background: linear-gradient(135deg, #9BE0E8, #C4B5F7 55%, #F8B8D9); }
+
+  /* 3. Call to action: dark aurora, light text */
+  .cta { color: #F2FFF4; text-align: center; padding: 140px 24px; background: #132B45; text-shadow: 0 1px 14px rgba(19,43,69,.7); }
+  .cta .btn { text-shadow: none; }
+  .cta h2 { margin-bottom: 18px; }
+  .cta p { max-width: 38ch; margin: 0 auto 30px; color: rgba(242,255,244,.78); }
+  .cta .btn { background: #EDFFEB; color: #132B45; }
+
+  footer { padding: 28px; text-align: center; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+  <nav>
+    <b>Meridian</b>
+    <ul><li><a href="#features">Features</a></li><li><a href="#cta">Pricing</a></li><li><a href="#cta">Sign in</a></li></ul>
+  </nav>
+
+  <!-- Declarative: preset name + a touch of film grain -->
+  <header class="hero" data-backdrop="fluid" data-grain="0.14">
+    <h1>Software that<br><em>feels</em> alive.</h1>
+    <p>A calm, always-moving backdrop behind the headline. Text stays crisp HTML on top.</p>
+    <div class="row"><a class="btn" href="#cta">Get started</a><a class="btn ghost" href="#features">See how</a></div>
+  </header>
+
+  <!-- A static CSS-only mesh would also work here; this one is the live shader with motion turned down -->
+  <section class="features" id="features" data-backdrop="soft-signal" data-speed="0.5" data-grain="0.1">
+    <h2>Soft light, quiet motion</h2>
+    <div class="cards">
+      <div class="card"><i></i><h3>Pauses off-screen</h3><p>Backdrops stop rendering when they scroll out of view, so long pages stay cheap.</p></div>
+      <div class="card"><i></i><h3>Respects reduced motion</h3><p>When the OS asks for less movement the field freezes on a single frame.</p></div>
+      <div class="card"><i></i><h3>OKLab colour mixing</h3><p>No muddy grey midpoints between complementary colours, and dithered to prevent banding.</p></div>
+    </div>
+  </section>
+
+  <section class="cta" id="cta" data-backdrop="aurora" data-colors="#EDFFEB #5FE896 #2E7A6A #132B45" data-params='{"fold":1.4,"stars":0.8}'>
+    <h2>Ready when you are.</h2>
+    <p>One script tag, one data attribute, and the section behind this text is a live aurora.</p>
+    <a class="btn" href="#">Start for free</a>
+  </section>
+
+  <footer>Example page from gradient-backdrops · all text and branding here is placeholder</footer>
+
+  <script src="../assets/backdrop.js"></script>
+</body>
+</html>
